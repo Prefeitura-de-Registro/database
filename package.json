@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "prisma": "^8.0.0-rc.13"
+  },
+  "scripts": {
+    "postinstall": "prisma skills sync || exit 0"
+  }
+}
