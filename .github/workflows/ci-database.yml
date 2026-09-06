@@ -26,9 +26,9 @@ jobs:
           node-version: 20
 
       - name: 3. Instalar o Prisma localmente
-        run: npm install prisma --save-dev
+        run: npm install prisma@5 --save-dev
       
-      - name: 5. Validar Formatação Estética (Prisma Format)
+      - name: 4. Validar Formatação Estética (Prisma Format)
         run: |
-          npx prisma format
+          npx prisma@5 format
           git diff --exit-code
