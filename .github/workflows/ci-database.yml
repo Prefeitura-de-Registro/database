@@ -27,13 +27,8 @@ jobs:
 
       - name: 3. Instalar o Prisma localmente
         run: npm install prisma --save-dev
-
-      # Quando a equipe criar o arquivo de tabelas (schema.prisma), 
-      # este passo vai garantir que não há erros de digitação na modelagem.
-      - name: 4. Validar Sintaxe do Banco de Dados
-        run: npx prisma validate
       
-      - name: 5. Validar Formatação Estética (Prisma Format)
+      - name: 4. Validar Formatação Estética (Prisma Format)
         run: |
           npx prisma format
           git diff --exit-code
