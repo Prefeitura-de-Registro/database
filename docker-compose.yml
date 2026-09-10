@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  db:
+  postgres:
     image: postgres:15-alpine
-    container_name: db_laboratorio
+    container_name: praticas-db-local
     restart: always
     environment:
-      POSTGRES_USER: devuser
-      POSTGRES_PASSWORD: devpassword
-      POSTGRES_DB: laboratoriodb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: lab_praticas
     ports:
       - "5432:5432"
     volumes:
-      - ./.pgdata:/var/lib/postgresql/data
+      - .pgdata:/var/lib/postgresql/data
