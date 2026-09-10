@@ -51,9 +51,9 @@ DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/lab_praticas?sch
 docker-compose up -d
 ```
 
-5. Aplique a migração inicial para criar as tabelas no banco local:
+5. Aplique o código abaixo para sincronizar as migrations com o banco:
 ```bash
-npx prisma migrate dev --name setup_inicial
+npx prisma migrate dev
 ```
 
 ### Visualização do Banco de Dados
@@ -65,6 +65,25 @@ Com o container ativo, conecte-se utilizando as credenciais padrão do `.env`:
 * **Database:** `lab_praticas`
 * **Login / Username:** `admin`
 * **Password:** `adminpassword`
+
+ 6. Após as alterações necessárias:
+   -  Formatar o arquivo de schema:
+      Garante que a indentação e os espaçamentos estejam nos conformes da pipeline de CI.
+         ```bash
+         npx prisma format
+         ```
+
+   - Criar a nova Migration e aplicar no banco local:
+     Gera o arquivo SQL com a alteração feita e aplica diretamente no PostgreSQL do Docker. Substitua o nome pela alteração realizada:
+        ```bash
+        npx prisma migrate dev --name adiciona_campo_telefone
+        ```
+
+   - Regenerar o Prisma Client (se for programar no código da aplicação):
+     Atualiza os tipos e os métodos do TypeScript/Node.js com base nas novas tabelas criadas:
+        ```bash
+        npx prisma generate
+        ```
 
 ---
 
