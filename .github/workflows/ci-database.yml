@@ -18,9 +18,9 @@ jobs:
           node-version: 20
 
       - name: 3. Instalar Dependencias
-        run: npm install
+        run: npm ci
 
       - name: 4. Validar Formatacao Estetica (Prisma Format)
         run: |
           npx prisma format
-          git diff --exit-code
+          git diff --exit-code prisma/
