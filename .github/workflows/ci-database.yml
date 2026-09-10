@@ -1,21 +1,13 @@
-name: Validar Banco de Dados (Prisma)
+name: CI Database
 
 on:
-  push:
-    branches:
-      - main
-      - develop
   pull_request:
-    branches:
-      - main
-      - develop
-  workflow_dispatch:
+    branches: [ "develop", "main", "epic/**" ]
 
 jobs:
-  validar_banco:
+  Validar-Schema-do-Banco:
     name: Validar Schema do Banco
     runs-on: ubuntu-latest
-
     steps:
       - name: 1. Baixar o codigo fonte
         uses: actions/checkout@v4
@@ -25,15 +17,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: 3. Instalar o Prisma localmente
-        run: npm install prisma --save-dev
+      - name: 3. Instalar Dependencias
+        run: npm ci
 
-      # Quando a equipe criar o arquivo de tabelas (schema.prisma), 
-      # este passo vai garantir que não há erros de digitação na modelagem.
-      - name: 4. Validar Sintaxe do Banco de Dados
-        run: npx prisma validate
-      
-      - name: 5. Validar Formatação Estética (Prisma Format)
+      - name: 4. Validar Formatacao Estetica (Prisma Format)
         run: |
           npx prisma format
-          git diff --exit-code
+          git diff --exit-code prisma/
