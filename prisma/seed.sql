@@ -13,10 +13,14 @@ TRUNCATE TABLE secretarias CASCADE;
 INSERT INTO secretarias (id, nome, sigla) VALUES
   (1, 'Secretaria Municipal de Infraestrutura e Serviços Públicos', 'SISP'),
   (2, 'Secretaria Municipal de Planejamento Urbano, Obras e Meio Ambiente', 'SPOMA');
+  (1, 'Secretaria Municipal de Infraestrutura e Serviços Públicos', 'SISP'),
+  (2, 'Secretaria Municipal de Planejamento Urbano, Obras e Meio Ambiente', 'SPOMA');
 
 INSERT INTO departamentos (id, id_secretaria, nome, sigla) VALUES
   (1, 1, 'Vias e Pavimentação', 'VIAS'),
   (2, 1, 'Poda e Arborização Urbana', 'PODA'),
+  (3, 1, 'Bueiros e Drenagem', 'DRENAGEM'),
+  (4, 2, 'Licenciamento Ambiental', 'LICAMB'); -- fora da Infraestrutura, ilustra a cadeia entre secretarias diferentes
   (3, 1, 'Bueiros e Drenagem', 'DRENAGEM'),
   (4, 2, 'Licenciamento Ambiental', 'LICAMB'); -- fora da Infraestrutura, ilustra a cadeia entre secretarias diferentes
 
@@ -153,6 +157,10 @@ INSERT INTO arquivos (id, id_ticket, path, tipo, created_at) VALUES
 -- Vias pede pra Poda avaliar; Poda, por sua vez, pede um parecer ao
 -- Licenciamento Ambiental (secretaria diferente) antes de responder a Vias.
 -- Ticket fica "pendente" até TODAS as solicitações da cadeia serem respondidas,
+-- TICKET 3 — MULTI-DEPARTAMENTO EM CADEIA: buraco causado por raiz de árvore.
+-- Vias pede pra Poda avaliar; Poda, por sua vez, pede um parecer ao
+-- Licenciamento Ambiental (secretaria diferente) antes de responder a Vias.
+-- Ticket fica "pendente" até TODAS as solicitações da cadeia serem respondidas,
 -- e o sistema reverte o status sozinho (id_usuario = NULL nesses eventos)
 -- ==========================================================
 
@@ -177,17 +185,32 @@ INSERT INTO ticket_historico (id, id_ticket, tipo_evento, status, prazo_minutos,
   (11, 3, 'mudanca_status','em_analise',    NULL, 4,    'Confirmado: raiz de árvore visível no asfalto.',       '2026-08-18 15:00:00'),
   (12, 3, 'mudanca_status','pendente',      NULL, NULL, 'Sistema: aguardando avaliação do departamento de Poda antes de prosseguir.', '2026-08-18 15:01:00'),
   (13, 3, 'mudanca_status','em_analise',    NULL, NULL, 'Sistema: todas as solicitações foram respondidas, retomando o fluxo normal do ticket.', '2026-08-19 11:30:00'),
+  (13, 3, 'mudanca_status','em_analise',    NULL, NULL, 'Sistema: todas as solicitações foram respondidas, retomando o fluxo normal do ticket.', '2026-08-19 11:30:00'),
   (14, 3, 'atribuicao',    NULL,            NULL, 4,    'Assumiu para reparo do asfalto após liberação da Poda.', '2026-08-19 13:00:00'),
   (15, 3, 'mudanca_status','em_andamento',  NULL, 4,    NULL,                                                    '2026-08-19 13:05:00');
 
 -- Solicitação 1: Vias -> Poda (gerada automaticamente pela pergunta 4, solicitado_por = NULL)
 -- Solicitação 2: Poda -> Licenciamento Ambiental (aberta manualmente pela Fernanda, dentro da Solicitação 1)
+-- Solicitação 1: Vias -> Poda (gerada automaticamente pela pergunta 4, solicitado_por = NULL)
+-- Solicitação 2: Poda -> Licenciamento Ambiental (aberta manualmente pela Fernanda, dentro da Solicitação 1)
 INSERT INTO solicitacoes
+  (id, id_ticket, id_departamento_solicitante, id_departamento_solicitado, solicitado_por, status, descricao, resposta, respondido_por, created_at, respondido_em)
   (id, id_ticket, id_departamento_solicitante, id_departamento_solicitado, solicitado_por, status, descricao, resposta, respondido_por, created_at, respondido_em)
 VALUES
   (1, 3, 1, 2, NULL,
    'respondida',
+  (1, 3, 1, 2, NULL,
+   'respondida',
    'Buraco na via aparenta ser causado por raiz de árvore. Podem avaliar se a árvore pode ser podada/removida antes do reparo do asfalto?',
+   'Avaliação concluída após parecer do Licenciamento Ambiental. Raiz pode ser cortada com segurança, sem necessidade de remover a árvore. Liberado para reparo da via.',
+   5, '2026-08-18 15:01:00', '2026-08-19 11:30:00'),
+  (2, 3, 2, 4, 5,
+   'respondida',
+   'Solicitamos parecer técnico sobre a possibilidade de corte da raiz da árvore sem necessidade de supressão, para viabilizar o reparo da via pela Infraestrutura.',
+   'Parecer técnico favorável ao corte da raiz, sem necessidade de licença de supressão, desde que preservada a copa da árvore.',
+   8, '2026-08-18 16:30:00', '2026-08-19 09:00:00');
+
+-- chat da Solicitação 1 (Vias <-> Poda)
    'Avaliação concluída após parecer do Licenciamento Ambiental. Raiz pode ser cortada com segurança, sem necessidade de remover a árvore. Liberado para reparo da via.',
    5, '2026-08-18 15:01:00', '2026-08-19 11:30:00'),
   (2, 3, 2, 4, 5,
@@ -207,12 +230,22 @@ INSERT INTO solicitacao_mensagens (id, id_solicitacao, id_usuario, mensagem, cre
   (3, 2, 5, 'Precisamos de um parecer técnico rápido, é referente a um buraco aberto na via.', '2026-08-18 16:35:00'),
   (4, 2, 8, 'Vou analisar as fotos e retorno até amanhã de manhã.', '2026-08-18 17:00:00'),
   (5, 2, 8, 'Parecer favorável ao corte da raiz — não configura supressão da árvore, não é necessária licença. Podem prosseguir.', '2026-08-19 09:00:00');
+  (2, 1, 5, 'Vamos até o local hoje à tarde. Pode ser que a gente precise de um parecer do Licenciamento Ambiental antes de autorizar o corte da raiz.', '2026-08-18 16:00:00'),
+  (6, 1, 5, 'Recebemos o parecer do Licenciamento Ambiental, favorável. Pode prosseguir com o reparo, não é necessário remover a árvore.', '2026-08-19 11:28:00');
+
+-- chat da Solicitação 2 (Poda <-> Licenciamento Ambiental) — thread separada, mesmo ticket
+INSERT INTO solicitacao_mensagens (id, id_solicitacao, id_usuario, mensagem, created_at) VALUES
+  (3, 2, 5, 'Precisamos de um parecer técnico rápido, é referente a um buraco aberto na via.', '2026-08-18 16:35:00'),
+  (4, 2, 8, 'Vou analisar as fotos e retorno até amanhã de manhã.', '2026-08-18 17:00:00'),
+  (5, 2, 8, 'Parecer favorável ao corte da raiz — não configura supressão da árvore, não é necessária licença. Podem prosseguir.', '2026-08-19 09:00:00');
 
 INSERT INTO arquivos (id, id_ticket, path, tipo, created_at) VALUES
   (3, 3, '/uploads/tickets/3/foto_abertura_1.jpg', 'foto_abertura', '2026-08-18 10:00:00');
 
 -- exemplo de imagem anexada numa MENSAGEM do chat entre departamentos (parecer do Licenciamento)
+-- exemplo de imagem anexada numa MENSAGEM do chat entre departamentos (parecer do Licenciamento)
 INSERT INTO arquivos (id, id_solicitacao_mensagem, path, tipo, created_at) VALUES
+  (5, 5, '/uploads/solicitacoes/2/mensagens/5/parecer_tecnico.jpg', 'parecer_tecnico', '2026-08-19 09:00:30');
   (5, 5, '/uploads/solicitacoes/2/mensagens/5/parecer_tecnico.jpg', 'parecer_tecnico', '2026-08-19 09:00:30');
 
 -- ==========================================================
@@ -241,7 +274,9 @@ INSERT INTO ticket_historico (id, id_ticket, tipo_evento, status, prazo_minutos,
 
 INSERT INTO solicitacoes
   (id, id_ticket, id_departamento_solicitante, id_departamento_solicitado, solicitado_por, status, descricao, created_at)
+  (id, id_ticket, id_departamento_solicitante, id_departamento_solicitado, solicitado_por, status, descricao, created_at)
 VALUES
+  (3, 4, 2, 1, NULL, 'pendente',
   (3, 4, 2, 1, NULL, 'pendente',
    'Árvore caída bloqueando parcialmente a via — solicitamos sinalização/isolamento do trecho até a remoção.',
    '2026-08-25 06:46:00');
@@ -281,6 +316,7 @@ INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, canal, status,
   (2, 6, 'novo_ticket', 1, 'push', 'enviada', '2026-08-20 09:12:00', '2026-08-20 09:12:05');
 
 -- nova_solicitacao 1 (Vias -> Poda, automática): notifica todos os funcionários da Poda
+-- nova_solicitacao 1 (Vias -> Poda, automática): notifica todos os funcionários da Poda
 INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at, enviado_em) VALUES
   (3, 5, 'nova_solicitacao', 3, 1, 'push', 'enviada', '2026-08-18 15:01:00', '2026-08-18 15:01:04');
 
@@ -293,10 +329,22 @@ INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao
   (5, 5, 'solicitacao_respondida', 3, 2, 'push', 'lida', '2026-08-19 09:00:00', '2026-08-19 09:00:03');
 
 -- solicitacao_respondida 1: solicitado_por = NULL (automática) -> notifica todos os funcionários da Vias
+-- nova_solicitacao 2 (Poda -> Licenciamento Ambiental, manual): notifica todos os funcionários do Licenciamento
+INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at, enviado_em) VALUES
+  (4, 8, 'nova_solicitacao', 3, 2, 'push', 'enviada', '2026-08-18 16:30:00', '2026-08-18 16:30:03');
+
+-- solicitacao_respondida 2: solicitado_por = Fernanda (5) -> notifica só ela
+INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at, enviado_em) VALUES
+  (5, 5, 'solicitacao_respondida', 3, 2, 'push', 'lida', '2026-08-19 09:00:00', '2026-08-19 09:00:03');
+
+-- solicitacao_respondida 1: solicitado_por = NULL (automática) -> notifica todos os funcionários da Vias
 INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at, enviado_em) VALUES
   (6, 4, 'solicitacao_respondida', 3, 1, 'push', 'enviada', '2026-08-19 11:30:00', '2026-08-19 11:30:03'),
   (7, 6, 'solicitacao_respondida', 3, 1, 'push', 'lida',    '2026-08-19 11:30:00', '2026-08-19 11:30:03');
+  (6, 4, 'solicitacao_respondida', 3, 1, 'push', 'enviada', '2026-08-19 11:30:00', '2026-08-19 11:30:03'),
+  (7, 6, 'solicitacao_respondida', 3, 1, 'push', 'lida',    '2026-08-19 11:30:00', '2026-08-19 11:30:03');
 
+-- notificação ainda não processada pelo worker (exemplo de fila pendente) — ticket 4, solicitacao 3
 -- notificação ainda não processada pelo worker (exemplo de fila pendente) — ticket 4, solicitacao 3
 INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at) VALUES
   (8, 4, 'nova_solicitacao', 4, 3, 'push', 'pendente', '2026-08-25 06:46:00'),
