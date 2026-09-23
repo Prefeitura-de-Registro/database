@@ -12,6 +12,7 @@ datasource db {
 enum TipoUsuario {
   municipe
   funcionario
+  gestor
 
   @@map("tipo_usuario_enum")
 }
