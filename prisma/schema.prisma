@@ -88,17 +88,18 @@ model Secretaria {
 }
 
 model Departamento {
-  id                   Int                   @id @default(autoincrement())
-  idSecretaria         Int                   @map("id_secretaria")
-  nome                 String                @db.VarChar
-  sigla                String?               @db.VarChar
-  ativo                Boolean               @default(true)
-  secretaria           Secretaria            @relation(fields: [idSecretaria], references: [id])
-  categorias           Categoria[]
-  perguntasSolicitadas Pergunta[]            @relation("DepartamentoSolicitado")
-  tickets              Ticket[]
-  solicitacoes         Solicitacao[]
-  usuarioDepartamentos UsuarioDepartamento[]
+  id                       Int                   @id @default(autoincrement())
+  idSecretaria             Int                   @map("id_secretaria")
+  nome                     String                @db.VarChar
+  sigla                    String?               @db.VarChar
+  ativo                    Boolean               @default(true)
+  secretaria               Secretaria            @relation(fields: [idSecretaria], references: [id])
+  categorias               Categoria[]
+  perguntasSolicitadas     Pergunta[]            @relation("DepartamentoSolicitado")
+  tickets                  Ticket[]
+  solicitacoesSolicitantes Solicitacao[]         @relation("DepartamentoSolicitante")
+  solicitacoes             Solicitacao[]         @relation("DepartamentoSolicitadoSolicitacao")
+  usuarioDepartamentos     UsuarioDepartamento[]
 
   @@index([idSecretaria])
   @@map("departamentos")
@@ -119,6 +120,7 @@ model User {
   historicos              TicketHistorico[]
   solicitacoesRespondidas Solicitacao[]         @relation("SolicitacaoRespondidaPor")
   mensagensSolicitacao    SolicitacaoMensagem[]
+  solicitacoesCriadas     Solicitacao[]         @relation("SolicitacaoCriadaPor")
   notificacoes            Notificacao[]
   logsAuditoria           LogAuditoria[]
 
@@ -233,23 +235,29 @@ model TicketHistorico {
 }
 
 model Solicitacao {
-  id                       Int                   @id @default(autoincrement())
-  idTicket                 Int                   @map("id_ticket")
-  idDepartamentoSolicitado Int                   @map("id_departamento_solicitado")
-  status                   SolicitacaoStatus     @default(pendente)
-  descricao                String                @db.Text
-  resposta                 String?               @db.Text
-  respondidoPor            Int?                  @map("respondido_por")
-  createdAt                DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
-  respondidoEm             DateTime?             @map("respondido_em") @db.Timestamp(6)
-  ticket                   Ticket                @relation(fields: [idTicket], references: [id])
-  departamentoSolicitado   Departamento          @relation(fields: [idDepartamentoSolicitado], references: [id])
-  usuarioRespondedor       User?                 @relation("SolicitacaoRespondidaPor", fields: [respondidoPor], references: [id])
-  mensagens                SolicitacaoMensagem[]
-  notificacoes             Notificacao[]
+  id                        Int                   @id @default(autoincrement())
+  idTicket                  Int                   @map("id_ticket")
+  idDepartamentoSolicitante Int                   @map("id_departamento_solicitante")
+  idDepartamentoSolicitado  Int                   @map("id_departamento_solicitado")
+  solicitadoPor             Int?                  @map("solicitado_por")
+  status                    SolicitacaoStatus     @default(pendente)
+  descricao                 String                @db.Text
+  resposta                  String?               @db.Text
+  respondidoPor             Int?                  @map("respondido_por")
+  createdAt                 DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  respondidoEm              DateTime?             @map("respondido_em") @db.Timestamp(6)
+  ticket                    Ticket                @relation(fields: [idTicket], references: [id])
+  departamentoSolicitante   Departamento          @relation("DepartamentoSolicitante", fields: [idDepartamentoSolicitante], references: [id])
+  departamentoSolicitado    Departamento          @relation("DepartamentoSolicitadoSolicitacao", fields: [idDepartamentoSolicitado], references: [id])
+  usuarioSolicitante        User?                 @relation("SolicitacaoCriadaPor", fields: [solicitadoPor], references: [id])
+  usuarioRespondedor        User?                 @relation("SolicitacaoRespondidaPor", fields: [respondidoPor], references: [id])
+  mensagens                 SolicitacaoMensagem[]
+  notificacoes              Notificacao[]
 
   @@index([idTicket])
+  @@index([idDepartamentoSolicitante])
   @@index([idDepartamentoSolicitado])
+  @@index([solicitadoPor])
   @@index([respondidoPor])
   @@map("solicitacoes")
 }
