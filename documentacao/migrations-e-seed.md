@@ -7,10 +7,8 @@ O banco separa a estrutura necessária pela aplicação dos dados fictícios de 
 ```text
 prisma/
 ├── migrations/
-│   ├── 20260910172256_tickets_registro/
-│   │   └── migration.sql  # Estrutura inicial: PostGIS, enums, tabelas, índices e FKs
-│   └── 20260923193000_solicitacoes_origem/
-│       └── migration.sql  # Origem da solicitação: departamento e usuário solicitante
+│   └── 20260910172256_tickets_registro/
+│       └── migration.sql  # Estrutura: PostGIS, enums, tabelas, índices e FKs
 ├── schema.prisma          # Mapeamento Prisma da estrutura
 └── seed.sql               # Dados de exemplo, apenas para desenvolvimento
 ```
@@ -33,7 +31,7 @@ docker compose up -d
 npx.cmd prisma migrate dev
 ```
 
-Em um banco vazio, esse comando cria extensão PostGIS, enums, tabelas, índices e relacionamentos, incluindo a origem de cada solicitação. Ele não cria os tickets de exemplo.
+Em um banco vazio, esse comando cria extensão PostGIS, enums, tabelas, índices e relacionamentos. Ele não cria os tickets de exemplo.
 
 ### 3. Carregar os dados de desenvolvimento
 
