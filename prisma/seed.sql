@@ -21,24 +21,24 @@ INSERT INTO departamentos (id, id_secretaria, nome, sigla) VALUES
 -- ---------- USUÁRIOS ----------
 
 -- linha reservada de usuário anônimo (nunca apagar)
-INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash, reservado) VALUES
-  (1, 'municipe', NULL, NULL, NULL, TRUE);
+INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash, cpf, matricula, cargo, reservado) VALUES
+  (1, 'municipe', NULL, NULL, NULL, NULL, NULL, NULL, TRUE);
 
 -- munícipes identificados
-INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash) VALUES
-  (2, 'municipe', 'Maria Aparecida da Silva', 'maria.silva@example.com', 'hash_exemplo_2'),
-  (3, 'municipe', 'João Pedro Santos',        'joao.santos@example.com', 'hash_exemplo_3');
+INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash, cpf) VALUES
+  (2, 'municipe', 'Maria Aparecida da Silva', 'maria.silva@example.com', 'hash_exemplo_2', '12345678909'),
+  (3, 'municipe', 'João Pedro Santos',        'joao.santos@example.com', 'hash_exemplo_3', '11144477735');
 
 -- funcionários
-INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash) VALUES
-  (4, 'funcionario', 'Carlos Eduardo Ramos',  'carlos.ramos@registro.sp.gov.br',  'hash_exemplo_4'),
-  (5, 'funcionario', 'Fernanda Lima Costa',   'fernanda.lima@registro.sp.gov.br', 'hash_exemplo_5'),
-  (6, 'funcionario', 'Roberto Alves Souza',   'roberto.souza@registro.sp.gov.br', 'hash_exemplo_6'),
-  (7, 'funcionario', 'Juliana Pereira Nunes', 'juliana.nunes@registro.sp.gov.br', 'hash_exemplo_7');
+INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash, cpf, matricula, cargo) VALUES
+  (4, 'funcionario', 'Carlos Eduardo Ramos',  'carlos.ramos@registro.sp.gov.br',  'hash_exemplo_4', '98765432100', 'SISP-0001', 'Fiscal de obras'),
+  (5, 'funcionario', 'Fernanda Lima Costa',   'fernanda.lima@registro.sp.gov.br', 'hash_exemplo_5', '93541134780', 'SISP-0002', 'Engenheira agrônoma'),
+  (6, 'funcionario', 'Roberto Alves Souza',   'roberto.souza@registro.sp.gov.br', 'hash_exemplo_6', '16899535009', 'SISP-0003', 'Técnico de infraestrutura'),
+  (7, 'funcionario', 'Juliana Pereira Nunes', 'juliana.nunes@registro.sp.gov.br', 'hash_exemplo_7', '52998224725', 'SISP-0004', 'Analista de drenagem');
 
 -- gestor (novo tipo de usuário: supervisiona os departamentos da secretaria)
-INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash) VALUES
-  (8, 'gestor', 'Patrícia Menezes Duarte', 'patricia.duarte@registro.sp.gov.br', 'hash_exemplo_8');
+INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash, cpf, matricula, cargo) VALUES
+  (8, 'gestor', 'Patrícia Menezes Duarte', 'patricia.duarte@registro.sp.gov.br', 'hash_exemplo_8', '71460238001', 'SISP-0005', 'Gerente de infraestrutura');
 
 -- vínculo funcionário x departamento (Roberto atua em 2 departamentos)
 INSERT INTO usuario_departamentos (id, id_usuario, id_departamento) VALUES
@@ -89,10 +89,10 @@ INSERT INTO perguntas (id, id_categoria, enunciado, reducao_minutos, critica, id
 -- ==========================================================
 
 INSERT INTO tickets
-  (id, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
+  (id, protocolo, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
    descricao, geom, token_acesso, prazo_primeira_resposta_minutos, prazo_resolucao_minutos, created_at)
 VALUES
-  (1, 2, 1, 1, 4, 'em_andamento', 'normal',
+  (1, 'REG-2026-000001', 2, 1, 1, 4, 'em_andamento', 'normal',
    'Buraco grande na Rua XV de Novembro, próximo ao número 450.',
    ST_GeogFromText('SRID=4326;POINT(-47.8455 -24.4838)'),
    NULL, 1440, 7200, -- pergunta 2 = sim (2880) => 10080-2880=7200
@@ -119,10 +119,10 @@ INSERT INTO arquivos (id, id_ticket, path, tipo, created_at) VALUES
 -- ==========================================================
 
 INSERT INTO tickets
-  (id, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
+  (id, protocolo, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
    descricao, geom, token_acesso, prazo_primeira_resposta_minutos, prazo_resolucao_minutos, created_at)
 VALUES
-  (2, 1, 1, 1, 6, 'resolvido', 'urgente',
+  (2, 'REG-2026-000002', 1, 1, 1, 6, 'resolvido', 'urgente',
    'Buraco profundo na Av. Jurumirim, causou queda de motociclista ontem à noite.',
    ST_GeogFromText('SRID=4326;POINT(-47.8501 -24.4901)'),
    'a1b2c3d4e5f647a89b0c1d2e3f4a5b6c', 1440, 1440, -- crítico => usa tempo_resolucao_urgente_minutos
@@ -152,10 +152,10 @@ INSERT INTO arquivos (id, id_ticket, path, tipo, created_at) VALUES
 -- ==========================================================
 
 INSERT INTO tickets
-  (id, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
+  (id, protocolo, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
    descricao, geom, token_acesso, prazo_primeira_resposta_minutos, prazo_resolucao_minutos, created_at)
 VALUES
-  (3, 3, 1, 1, 4, 'em_andamento', 'normal',
+  (3, 'REG-2026-000003', 3, 1, 1, 4, 'em_andamento', 'normal',
    'Buraco na Rua das Palmeiras causado por raiz de árvore levantando o asfalto.',
    ST_GeogFromText('SRID=4326;POINT(-47.8390 -24.4790)'),
    NULL, 1440, 5760, -- pergunta2=sim(2880) + pergunta3=sim(1440) => 10080-4320=5760
@@ -201,10 +201,10 @@ INSERT INTO arquivos (id, id_solicitacao_mensagem, path, tipo, created_at) VALUE
 -- ==========================================================
 
 INSERT INTO tickets
-  (id, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
+  (id, protocolo, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
    descricao, geom, token_acesso, prazo_primeira_resposta_minutos, prazo_resolucao_minutos, created_at)
 VALUES
-  (4, 1, 2, 2, NULL, 'pendente', 'normal',
+  (4, 'REG-2026-000004', 1, 2, 2, NULL, 'pendente', 'normal',
    'Árvore de grande porte caiu parcialmente e está bloqueando a calçada e parte da via na Rua Coronel José Luiz.',
    ST_GeogFromText('SRID=4326;POINT(-47.8420 -24.4860)'),
    'f1e2d3c4b5a647890b1c2d3e4f5a6b7c', 2880, 18720, -- pergunta6=sim(1440) => 20160-1440=18720
@@ -235,10 +235,10 @@ INSERT INTO arquivos (id, id_ticket, path, tipo, created_at) VALUES
 -- ==========================================================
 
 INSERT INTO tickets
-  (id, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
+  (id, protocolo, id_usuario, id_categoria, id_departamento, id_funcionario_responsavel, status, prioridade,
    descricao, geom, token_acesso, prazo_primeira_resposta_minutos, prazo_resolucao_minutos, created_at)
 VALUES
-  (5, 2, 3, 3, 7, 'fechado', 'normal',
+  (5, 'REG-2026-000005', 2, 3, 3, 7, 'fechado', 'normal',
    'Bueiro entupido na esquina da Rua Barão do Rio Branco com Rua Cel. Joaquim.',
    ST_GeogFromText('SRID=4326;POINT(-47.8470 -24.4845)'),
    NULL, 720, 4320,

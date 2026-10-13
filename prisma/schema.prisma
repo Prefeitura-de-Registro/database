@@ -110,6 +110,9 @@ model User {
   name                    String?               @map("nome") @db.VarChar
   email                   String?               @db.VarChar
   passwordHash            String?               @map("senha_hash") @db.VarChar
+  cpf                     String?               @unique @db.VarChar(11)
+  matricula               String?               @unique @db.VarChar
+  cargo                   String?               @db.VarChar
   reservado               Boolean               @default(false)
   ativo                   Boolean               @default(true)
   createdAt               DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
@@ -181,6 +184,7 @@ model Ticket {
   prioridade                   TicketPrioridade                      @default(normal)
   descricao                    String?                               @db.Text
   geom                         Unsupported("geography(Point,4326)")?
+  protocolo                    String?                               @unique @db.VarChar
   tokenAcesso                  String?                               @unique @map("token_acesso") @db.VarChar
   prazoPrimeiraRespostaMinutos Int                                   @map("prazo_primeira_resposta_minutos")
   prazoResolucaoMinutos        Int                                   @map("prazo_resolucao_minutos")
